@@ -39,43 +39,16 @@ std::shared_ptr<ShaderProgram> GraphicsAPI::CreateShaderProgram(std::string_view
     return std::make_shared<ShaderProgram>(program);
 }
 
-u32 GraphicsAPI::CreateBuffer(void* data, usize buffer_size)
-{
-    u32 bo;
-    glCreateBuffers(1, &bo);
-    glNamedBufferStorage(bo, buffer_size, data, 0);
-    return bo;
-}
+void GraphicsAPI::Init() {
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
-void GraphicsAPI::DestroyBuffer(u32 buffer)
-{
-    glDeleteBuffers(1, &buffer);
-}
-
-void GraphicsAPI::BindShaderProgram(ShaderProgram* program) {
-    if (program) {
-        program->Bind();
-    }
-}
-
-void GraphicsAPI::BindMaterial(Material *material) {
-    material->Bind();
-}
-
-void GraphicsAPI::BindMesh(Mesh* mesh) {
-    if (mesh) {
-        mesh->Bind();
-    }
-}
-
-void GraphicsAPI::DrawMesh(Mesh* mesh) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+}
 
-    if (mesh) {
-        mesh->Draw();
-    }
+void GraphicsAPI::Shutdown() {
 }
 
 void GraphicsAPI::SetClearColor(f32 r, f32 g, f32 b, f32 a) {
@@ -83,7 +56,7 @@ void GraphicsAPI::SetClearColor(f32 r, f32 g, f32 b, f32 a) {
 }
 
 void GraphicsAPI::ClearBuffers() {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 static GLuint CreateShader(GLenum type, std::string_view source)

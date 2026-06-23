@@ -9,7 +9,17 @@ void CameraComponent::Update(f32 dt) {
 }
 
 glm::mat4 CameraComponent::GetViewMatrix() const {
-    return glm::inverse(m_owner->GetTransformWorld());
+    auto rot = m_owner->GetRotation();
+    auto pos = m_owner->GetPosition();
+
+    if (auto* parent = m_owner->parent; parent) {
+        auto parent_rot = parent->GetRotationWorld();
+        rot = parent_rot * rot;
+        pos += parent->GetPositionWorld() + parent_rot * pos;
+    }
+
+    auto m = glm::translate(glm::mat4_cast(glm::conjugate(rot)), -pos);
+    return m;
 }
 
 glm::mat4 CameraComponent::GetProjectionMatrix(f32 aspect) const {

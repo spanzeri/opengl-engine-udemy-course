@@ -40,7 +40,6 @@ TestObject::TestObject() {
 
     auto& graphics = Engine::GetInstance().graphics;
     auto shader = graphics.CreateShaderProgram(vertex_shader_code, fragment_shader_code);
-    graphics.BindShaderProgram(shader.get());
 
     auto material = std::make_shared<Material>(MOV(shader));
 

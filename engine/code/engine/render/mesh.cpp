@@ -8,9 +8,8 @@
 Mesh::Mesh(const VertexLayout &vertex_layout, std::span<f32> vertices, std::span<u16> indices)
     : m_vertex_layout(vertex_layout), m_index_count(indices.size())
 {
-    auto &graphics = Engine::GetInstance().graphics;
-    m_vbo = graphics.CreateBuffer(vertices);
-    m_ibo = graphics.CreateBuffer(indices);
+    m_vbo = Buffer(Buffer::Type::Vertex, vertices, false);
+    m_ibo = Buffer(Buffer::Type::Index, indices, false);
 
     glCreateVertexArrays(1, &m_vao);
 
@@ -20,8 +19,8 @@ Mesh::Mesh(const VertexLayout &vertex_layout, std::span<f32> vertices, std::span
         glVertexArrayAttribFormat(m_vao, vl.index, vl.size, vl.type, GL_FALSE, vl.offset);
         glVertexArrayAttribBinding(m_vao, vl.index, 0);
     }
-    glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, vertex_layout.stride);
-    glVertexArrayElementBuffer(m_vao, m_ibo);
+    glVertexArrayVertexBuffer(m_vao, 0, m_vbo.GetId(), 0, vertex_layout.stride);
+    glVertexArrayElementBuffer(m_vao, m_ibo.GetId());
 
     ASSERT(
         (vertices.size_bytes() % m_vertex_layout.stride) == 0,
@@ -32,8 +31,7 @@ Mesh::Mesh(const VertexLayout &vertex_layout, std::span<f32> vertices, std::span
 Mesh::Mesh(const VertexLayout &vertex_layout, std::span<f32> vertices)
     : m_vertex_layout(vertex_layout), m_vertex_count(vertices.size()), m_index_count(0)
 {
-    auto &graphics = Engine::GetInstance().graphics;
-    m_vbo = graphics.CreateBuffer(vertices);
+    m_vbo = Buffer(Buffer::Type::Vertex, vertices, false);
 
     glCreateVertexArrays(1, &m_vao);
 
@@ -43,7 +41,7 @@ Mesh::Mesh(const VertexLayout &vertex_layout, std::span<f32> vertices)
         glVertexArrayAttribFormat(m_vao, vl.index, vl.size, vl.type, GL_FALSE, vl.offset);
         glVertexArrayAttribBinding(m_vao, vl.index, 0);
     }
-    glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, vertex_layout.stride);
+    glVertexArrayVertexBuffer(m_vao, 0, m_vbo.GetId(), 0, vertex_layout.stride);
 
     ASSERT(
         (vertices.size_bytes() % m_vertex_layout.stride) == 0,
@@ -53,12 +51,8 @@ Mesh::Mesh(const VertexLayout &vertex_layout, std::span<f32> vertices)
 
 Mesh::~Mesh()
 {
-    auto &graphics = Engine::GetInstance().graphics;
-    graphics.DestroyBuffer(m_ibo);
-    graphics.DestroyBuffer(m_vbo);
     glDeleteVertexArrays(1, &m_vao);
-
-    m_ibo = m_vbo = m_vao = 0;
+    m_vao = 0;
 }
 
 void Mesh::Bind()

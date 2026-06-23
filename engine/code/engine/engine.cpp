@@ -124,6 +124,9 @@ bool Engine::Init(s32 width, s32 height)
         }, nullptr);
 #endif
 
+    graphics.Init();
+    render_queue.Init();
+
     return m_application->Init();
 }
 
@@ -133,6 +136,9 @@ void Engine::Shutdown()
         m_current_scene->Clear();
         m_current_scene.reset();
     }
+
+    graphics.Shutdown();
+    render_queue.Shutdown();
 
     if (m_application) {
         m_application->Shutdown();
@@ -174,21 +180,22 @@ void Engine::Run()
         glfwGetFramebufferSize(m_window, &win_w, &win_h);
         f32 aspect = (f32)win_w / (f32)win_h;
 
-        CameraData camera_data;
+        FrameUniforms frame_uniforms = {};
         if (m_current_scene) {
             if (auto camera_object  = m_current_scene->GetActiveCamera()) {
                 auto* camera_comp = camera_object->GetComponent<CameraComponent>();
                 ASSERT(camera_comp, "The camera object doesn't have a camera component associated");
 
                 if (camera_comp) {
-                    camera_data.view_matrix = camera_comp->GetViewMatrix();
-                    camera_data.proj_matrix = camera_comp->GetProjectionMatrix(aspect);
+                    frame_uniforms.view       = camera_comp->GetViewMatrix();
+                    frame_uniforms.proj       = camera_comp->GetProjectionMatrix(aspect);
+                    frame_uniforms.camera_pos = glm::vec4(camera_object->GetPositionWorld(), 1);
+                    frame_uniforms.time       = (f32)glfwGetTime();
                 }
             }
         }
 
-        render_queue.Draw(graphics, camera_data);
-
+        render_queue.Draw(frame_uniforms);
         glfwSwapBuffers(m_window);
     }
 

@@ -2,6 +2,7 @@
 
 #include "../base.h"
 #include "../graphics/vertex-layout.h"
+#include "../graphics/buffer.h"
 
 class Mesh : NonCopiable {
 public:
@@ -16,8 +17,8 @@ public:
 private:
     VertexLayout m_vertex_layout = {};
     u32 m_vao = 0;
-    u32 m_vbo = 0;
-    u32 m_ibo = 0;
+    Buffer m_vbo;
+    Buffer m_ibo;
 
     usize m_vertex_count = 0;
     usize m_index_count = 0;

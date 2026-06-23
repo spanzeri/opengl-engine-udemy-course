@@ -3,6 +3,7 @@
 #include "application.h"
 #include "graphics/graphics-api.h"
 #include "input-manager.h"
+#include "io/filesystem.h"
 #include "render/render-queue.h"
 #include "scene/scene.h"
 
@@ -32,8 +33,9 @@ public:
 
 public:
     InputManager input;
-    GraphicsAPI graphics;
-    RenderQueue render_queue;
+    GraphicsAPI  graphics;
+    RenderQueue  render_queue;
+    FileSystem   file_system;
 
 private:
     std::unique_ptr<Application> m_application;

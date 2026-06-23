@@ -4,17 +4,21 @@
 
 #include <glm/mat4x4.hpp>
 
+class Texture;
+
 class ShaderProgram : NonCopiable {
 public:
     explicit ShaderProgram(u32 program_id);
     ~ShaderProgram();
 
-    u32  GetID() const;
+    u32 GetID() const;
+    s32 GetUniformLocation(const std::string& name) const;
 
     void Bind();
-    void SetUniform(u32 param, f32 value);
-    void SetUniform(u32 param, f32 v0, f32 v1);
-    void SetUniform(u32 param, const glm::mat4& mat);
+    void SetUniform(s32 location, f32 value);
+    void SetUniform(s32 location, f32 v0, f32 v1);
+    void SetUniform(s32 location, const glm::mat4& mat);
+    void SetTexture(s32 location, Texture* texture);
 
     bool IsValid() const;
 

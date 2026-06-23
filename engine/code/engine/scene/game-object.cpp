@@ -44,11 +44,11 @@ void GameObject::SetPosition(glm::vec3 pos) {
     m_position = pos;
 }
 
-glm::vec3 GameObject::GetRotation() const  {
+glm::quat GameObject::GetRotation() const  {
     return m_rotation;
 }
 
-void GameObject::SetRotation(glm::vec3 rot) {
+void GameObject::SetRotation(glm::quat rot) {
     m_rotation = rot;
 }
 
@@ -61,7 +61,7 @@ void GameObject::SetScale(glm::vec3 scale) {
 }
 
 glm::mat4 GameObject::GetTransformLocal() const {
-    glm::mat4 m = glm::eulerAngleZYX(m_rotation.z, m_rotation.y, m_rotation.x);
+    glm::mat4 m = glm::mat4_cast(m_rotation);
     m[0] *= m_scale.x;
     m[1] *= m_scale.y;
     m[2] *= m_scale.z;
@@ -75,5 +75,20 @@ glm::mat4 GameObject::GetTransformWorld() const {
     }
 
     return parent->GetTransformWorld() * GetTransformLocal();
+}
+
+glm::vec3 GameObject::GetPositionWorld() const {
+    if (parent == nullptr) {
+        return m_position;
+    }
+
+    return parent->GetPositionWorld() + parent->GetRotationWorld() * m_position;
+}
+
+glm::quat GameObject::GetRotationWorld() const {
+    if (parent == nullptr) {
+        return m_rotation;
+    }
+    return parent->GetRotationWorld() * m_rotation;
 }
 
