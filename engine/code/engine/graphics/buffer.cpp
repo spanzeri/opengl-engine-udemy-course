@@ -2,7 +2,9 @@
 
 #include <glad/gl.h>
 
-Buffer::Buffer(Type type, const void* data, usize size, bool dynamic) {
+Buffer::Buffer(Type type, const void* data, usize size, bool dynamic)
+    : m_size(size)
+{
     glCreateBuffers(1, &m_id);
 
     GLbitfield flags = dynamic ? GL_DYNAMIC_STORAGE_BIT : 0;

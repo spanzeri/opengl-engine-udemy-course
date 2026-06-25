@@ -112,12 +112,12 @@ TestObject::TestObject() {
         .elements = { {
                 .index  = 0,
                 .size   = 3,
-                .type   = TYPE_F32,
+                .type   = VertexElement::Type::F32,
                 .offset = 0,
             }, {
                 .index  = 1,
                 .size   = 3,
-                .type   = TYPE_F32,
+                .type   = VertexElement::Type::F32,
                 .offset = sizeof(f32) * 3,
             }
         },

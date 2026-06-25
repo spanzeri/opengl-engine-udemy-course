@@ -119,6 +119,7 @@ constexpr void ImplInfo_(const char* file, u32 line, fmt::format_string<Args...>
             if (!(cond)) [[unlikely]] {                                                                     \
                 fmt::println(stderr, "{}:{}: ASSERTION FAILED: {}", __FILE__, __LINE__, PP_TOSTRING(cond)); \
                 __VA_OPT__( fmt::println(stderr, "> Message: " __VA_ARGS__); )                              \
+                DEBUGBREAK();                                                                               \
             }                                                                                               \
         } while (0)
 #else // ENABLE_ASSERTS

@@ -4,6 +4,8 @@
 #include "../graphics/vertex-layout.h"
 #include "../graphics/buffer.h"
 
+#include <memory>
+
 class Mesh : NonCopiable {
 public:
     Mesh() = default;
@@ -13,6 +15,8 @@ public:
 
     void Bind();
     void Draw();
+
+    static std::shared_ptr<Mesh> Load(std::string_view path);
 
 private:
     VertexLayout m_vertex_layout = {};

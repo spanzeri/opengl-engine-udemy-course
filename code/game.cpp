@@ -94,17 +94,17 @@ bool Game::Init()
         .elements = { {
                 .index  = 0,
                 .size   = 3,
-                .type   = TYPE_F32,
+                .type   = VertexElement::Type::F32,
                 .offset = 0,
             }, {
                 .index  = 1,
                 .size   = 3,
-                .type   = TYPE_F32,
+                .type   = VertexElement::Type::F32,
                 .offset = sizeof(f32) * 3,
             }, {
                 .index  = 2,
                 .size   = 2,
-                .type   = TYPE_F32,
+                .type   = VertexElement::Type::F32,
                 .offset = sizeof(f32) * 6,
             }
         },
@@ -123,6 +123,15 @@ bool Game::Init()
     auto cube2 = scene->CreateObject<GameObject>("Cube2");
     cube2->AddComponent(new MeshComponent(material, mesh));
     cube2->SetPosition(glm::vec3( 1, 0, 0));
+
+    {
+        auto suzanne_mesh = Mesh::Load("model/suzanne/Suzanne.gltf");
+        auto suzanne_mat  = Material::Load("material/suzanne.mat");
+        auto suzanne_obj = scene->CreateObject<GameObject>("Suzanne");
+        suzanne_obj->AddComponent(new MeshComponent(suzanne_mat, suzanne_mesh));
+        suzanne_obj->SetPosition(glm::vec3( 0, 1, 0));
+    }
+
 
     auto* player = scene->CreateObject("Player");
     player->AddComponent(new PlayerControllerComponent());
