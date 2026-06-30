@@ -15,8 +15,9 @@ struct VertexElement {
     u32     offset = 0;           // bytes offset from start of the vertex
 
     static constexpr s32 PositionIndex = 0;
-    static constexpr s32 ColorIndex = 1;
-    static constexpr s32 UVIndex = 2;
+    static constexpr s32 ColorIndex    = 1;
+    static constexpr s32 NormalIndex   = 2;
+    static constexpr s32 UVIndex       = 3;
 };
 
 struct VertexLayout {

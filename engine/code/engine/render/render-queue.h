@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../base.h"
-
+#include "../common.h"
 #include "../graphics/buffer.h"
 
 #include <glm/mat4x4.hpp>
@@ -16,24 +15,13 @@ struct RenderCommand {
     glm::mat4 model_mat = glm::mat4(1.0f);
 };
 
-constexpr u32 FRAME_DATA_BINDING = 0;
-constexpr u32 MODEL_MATRIX_LOCATION = 0;
-
-struct FrameUniforms {
-    glm::mat4   view;
-    glm::mat4   proj;
-    glm::vec4   camera_pos;
-    f32         time;
-    f32         pad[3];
-};
-
 class RenderQueue {
 public:
     void Init();
     void Shutdown();
 
     void Submit(RenderCommand command);
-    void Draw(const FrameUniforms& frame);
+    void Draw(const FrameUniforms& frame, std::span<LightData> lights);
 
 private:
     std::vector<RenderCommand> m_commands;

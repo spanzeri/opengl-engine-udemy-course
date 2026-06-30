@@ -3,6 +3,7 @@
 #include "../base.h"
 
 #include <memory>
+#include <unordered_map>
 
 class Texture {
 public:
@@ -24,4 +25,15 @@ private:
     s32 m_height;
     s32 m_channels;
     u32 m_texture_id = 0;
+};
+
+class TextureManager {
+public:
+    [[nodiscard]]
+    std::shared_ptr<Texture> GetOrLoadTexture(std::string_view path);
+
+    void Clear();
+
+private:
+    std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures;
 };

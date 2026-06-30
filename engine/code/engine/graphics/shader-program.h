@@ -17,6 +17,7 @@ public:
     void Bind();
     void SetUniform(s32 location, f32 value);
     void SetUniform(s32 location, f32 v0, f32 v1);
+    void SetUniform(s32 location, glm::vec3 v3);
     void SetUniform(s32 location, const glm::mat4& mat);
     void SetTexture(s32 location, Texture* texture);
 

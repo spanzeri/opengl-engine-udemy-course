@@ -17,6 +17,8 @@ constexpr u32 MODEL_MATRIX_PARAM = 0;
 
 class Material {
 public:
+    static constexpr u32 PBR_TEXTURE_ALBEDO_SLOT = 0;
+
     explicit Material(const std::shared_ptr<ShaderProgram> &program);
     ~Material() = default;
 
@@ -26,6 +28,7 @@ public:
     void SetParam(u32 param, f32 v0, f32 v1);
     void SetParam(u32 param, const glm::mat4& mat);
     void SetParam(u32 texture_slot, const std::shared_ptr<Texture>& texture);
+
     void Bind();
 
     bool IsValid() const;

@@ -12,20 +12,32 @@
 #include <string>
 #include <vector>
 
+class Scene;
+
 class GameObject {
 public:
     virtual ~GameObject() = default;
-    virtual void Update(f32 dt) { unused(dt); }
+    virtual void Update(f32 dt) { Unused(dt); }
 
     void    DoUpdate(f32 dt);
 
     bool    IsAlive() const;
     void    MarkForDestroy();
 
+    void    SetActive(bool active);
+    bool    IsActive() const;
+
     void    AddComponent(Component* component);
 
-    template <std::derived_from<Component> T>
-    [[nodiscard]] T* GetComponent() const;
+    template <std::derived_from<Component> CompT>
+    [[nodiscard]] CompT* GetComponent() const;
+
+    GameObject* FindChildByName(std::string_view child_name);
+
+    Scene* GetScene() const;
+
+    GameObject* GetParent() const;
+    void SetParent(GameObject* parent);
 
     glm::vec3 GetPosition() const;
     void SetPosition(glm::vec3 pos);
@@ -36,23 +48,28 @@ public:
     glm::vec3 GetScale() const;
     void SetScale(glm::vec3 scale);
 
-    glm::mat4 GetTransformLocal() const;
-    glm::mat4 GetTransformWorld() const;
+    glm::mat4 GetLocalTransform() const;
+    glm::mat4 GetWorldTransform() const;
 
-    glm::vec3 GetPositionWorld() const;
-    glm::quat GetRotationWorld() const;
+    glm::vec3 GetWorldPosition() const;
+    glm::quat GetWorldRotation() const;
+
+    static GameObject* LoadGLTF(std::string_view path);
 
     std::string name;
-    GameObject* parent = nullptr;
 
 protected:
     GameObject() = default;
 
 private:
+    Scene* m_scene = nullptr;
+    GameObject* m_parent = nullptr;
+
     std::vector<std::unique_ptr<GameObject>> m_children;
     std::vector<std::unique_ptr<Component>>  m_components;
 
-    bool m_is_alive = true;
+    bool m_alive = true;
+    bool m_active = true;
 
     glm::vec3 m_position = glm::vec3(0.0f);
     glm::quat m_rotation = glm::quat(1, glm::vec3(0));

@@ -114,7 +114,7 @@ std::shared_ptr<Material> Material::Load(std::string_view path) {
                 u32 slot = p.value("slot", 0u);
                 std::string path = p.value("path", "");
                 if (!path.empty()) {
-                    auto tex = Texture::Load(path);
+                    auto tex = Engine::GetInstance().texture_manager.GetOrLoadTexture(path);
                     material->SetParam(slot, MOV(tex));
                 }
             }

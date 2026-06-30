@@ -58,7 +58,7 @@ static_assert(sizeof(f64) == 8);
 template <usize N>
 constexpr usize countof(auto (&)[N]) { return N; }
 
-constexpr void unused(auto &&...) {}
+constexpr void Unused(auto &&...) {}
 
 template <typename T> struct RemoveReference        { using Type = T; };
 template <typename T> struct RemoveReference<T &>   { using Type = T; };
@@ -71,6 +71,9 @@ template <typename T> using RemoveReferenceT = typename RemoveReference<T>::Type
 constexpr auto Min(auto a, auto b)             { return a < b ? a : b; }
 constexpr auto Max(auto a, auto b)             { return a > b ? a : b; }
 constexpr auto Clamp(auto v, auto lo, auto hi) { return Max(lo, Min(v, hi)); }
+
+constexpr auto Lerp(auto a, auto b, f32 t)      { return a + (b - a) * t; }
+constexpr auto Lerp(auto a, auto b, f64 t)      { return a + (b - a) * t; }
 
 template <typename ...Args>
 constexpr void ImplError_(const char* file, u32 line, fmt::format_string<Args...> fmt, Args &&...args)

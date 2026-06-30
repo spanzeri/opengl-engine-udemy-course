@@ -36,6 +36,12 @@ void ShaderProgram::SetUniform(s32 location, f32 v0, f32 v1) {
     }
 }
 
+void ShaderProgram::SetUniform(s32 location, glm::vec3 v3) {
+    if (m_id != 0 && location != -1) {
+        glProgramUniform3f(m_id, location, v3.x, v3.y, v3.z);
+    }
+}
+
 void ShaderProgram::SetUniform(s32 location, const glm::mat4& mat) {
     if (m_id != 0 && location != -1) {
         glProgramUniformMatrix4fv(m_id, location, 1, GL_FALSE, glm::value_ptr(mat));

@@ -5,17 +5,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 void CameraComponent::Update(f32 dt) {
-    unused(dt);
+    Unused(dt);
 }
 
 glm::mat4 CameraComponent::GetViewMatrix() const {
     auto rot = m_owner->GetRotation();
     auto pos = m_owner->GetPosition();
 
-    if (auto* parent = m_owner->parent; parent) {
-        auto parent_rot = parent->GetRotationWorld();
+    if (auto* parent = m_owner->GetParent(); parent) {
+        auto parent_rot = parent->GetWorldRotation();
         rot = parent_rot * rot;
-        pos += parent->GetPositionWorld() + parent_rot * pos;
+        pos = parent->GetWorldPosition() + parent_rot * pos;
     }
 
     auto m = glm::translate(glm::mat4_cast(glm::conjugate(rot)), -pos);

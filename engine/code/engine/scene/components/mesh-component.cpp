@@ -15,7 +15,7 @@ void MeshComponent::Update(f32 dt) {
     Engine::GetInstance().render_queue.Submit({
         .mesh      = m_mesh.get(),
         .material  = m_material.get(),
-        .model_mat = m_owner->GetTransformWorld(),
+        .model_mat = m_owner->GetWorldTransform(),
     });
 }
 

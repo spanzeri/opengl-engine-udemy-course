@@ -17,7 +17,7 @@ void RenderQueue::Submit(RenderCommand command) {
     m_commands.push_back(command);
 }
 
-void RenderQueue::Draw(const FrameUniforms& uniforms) {
+void RenderQueue::Draw(const FrameUniforms& uniforms, std::span<LightData> lights) {
     m_frame_ubo.Update(&uniforms, sizeof(uniforms));
     m_frame_ubo.BindBase(FRAME_DATA_BINDING);
 
@@ -27,6 +27,14 @@ void RenderQueue::Draw(const FrameUniforms& uniforms) {
         if (command.material && command.mesh) {
             command.material->Bind();
             command.material->GetShaderProgram()->SetUniform(MODEL_MATRIX_LOCATION, command.model_mat);
+
+            if (!lights.empty()) {
+                auto* prog = command.material->GetShaderProgram();
+                auto& light = lights[0];
+
+                prog->SetUniform(prog->GetUniformLocation("uLight.color"), light.color);
+                prog->SetUniform(prog->GetUniformLocation("uLight.position"), light.position);
+            }
 
             command.mesh->Bind();
             command.mesh->Draw();

@@ -39,9 +39,11 @@ void Texture::Init(s32 width, s32 height, s32 num_channels, u8* data) {
 
     GLsizei level_count = ComputeMipLevels(width, height);
 
-    glTextureStorage2D(m_texture_id, level_count, GL_RGBA8, width, height);
+    GLenum internal_format = GL_RGBA8;
+    GLint format = GL_RGBA;
 
-    glTextureSubImage2D(m_texture_id, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTextureStorage2D(m_texture_id, level_count, internal_format, width, height);
+    glTextureSubImage2D(m_texture_id, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 
     glGenerateTextureMipmap(m_texture_id);
 
@@ -89,3 +91,19 @@ std::shared_ptr<Texture> Texture::Load(std::string_view path) {
 
     return tex;
 }
+
+std::shared_ptr<Texture> TextureManager::GetOrLoadTexture(std::string_view path) {
+    auto key = std::string(path);
+    if (auto it = m_textures.find(key); it != m_textures.end()) {
+        return it->second;
+    }
+
+    auto texture = Texture::Load(path);
+    m_textures[key] = texture;
+    return texture;
+}
+
+void TextureManager::Clear() {
+    m_textures.clear();
+}
+

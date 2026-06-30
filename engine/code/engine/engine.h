@@ -1,7 +1,10 @@
 #pragma once
 
 #include "application.h"
+
 #include "graphics/graphics-api.h"
+#include "graphics/texture.h"
+
 #include "input-manager.h"
 #include "io/filesystem.h"
 #include "render/render-queue.h"
@@ -32,10 +35,11 @@ public:
     Scene* GetCurrentScene() const;
 
 public:
-    InputManager input;
-    GraphicsAPI  graphics;
-    RenderQueue  render_queue;
-    FileSystem   file_system;
+    InputManager   input;
+    GraphicsAPI    graphics;
+    RenderQueue    render_queue;
+    FileSystem     file_system;
+    TextureManager texture_manager;
 
 private:
     std::unique_ptr<Application> m_application;
@@ -43,5 +47,7 @@ private:
 
     hrclock::time_point m_last_time;
     GLFWwindow *m_window;
+
+    f64 m_average_dt_sec = 0.016f;
 };
 

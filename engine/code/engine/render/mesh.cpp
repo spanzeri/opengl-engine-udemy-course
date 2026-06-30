@@ -1,7 +1,6 @@
 #include "mesh.h"
 
 #include "../engine.h"
-#include "../graphics/graphics-api.h"
 
 #include <glad/gl.h>
 
@@ -121,7 +120,7 @@ std::shared_ptr<Mesh> Mesh::Load(std::string_view path) {
             }
 
             VertexLayout vertex_layout = {};
-            cgltf_accessor* accessors[3] = { nullptr, nullptr, nullptr };
+            cgltf_accessor* accessors[4] = {};
 
             for (cgltf_size ai = 0; ai < primitive.attributes_count; ai++) {
                 auto& attribute = primitive.attributes[ai];
@@ -137,6 +136,12 @@ std::shared_ptr<Mesh> Mesh::Load(std::string_view path) {
                     case cgltf_attribute_type_position: {
                         accessors[VertexElement::PositionIndex] = accessor;
                         element.index = VertexElement::PositionIndex;
+                        element.size = 3;
+                    } break;
+
+                    case cgltf_attribute_type_normal: {
+                        accessors[VertexElement::NormalIndex] = accessor;
+                        element.index = VertexElement::NormalIndex;
                         element.size = 3;
                     } break;
 
@@ -218,5 +223,95 @@ std::shared_ptr<Mesh> Mesh::Load(std::string_view path) {
     }
 
     return result;
+}
+
+std::shared_ptr<Mesh> Mesh::CreateCube() {
+    f32 vertices[] = {
+         //    position    |     color      | nornal |    uvs
+        // front
+        -0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0, 0, 1, 0, 0,
+         0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0, 0, 1, 1, 0,
+         0.5f,  0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 0, 0, 1, 1, 1,
+        -0.5f,  0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0, 0, 1, 0, 1,
+
+        // back
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0, 0, -1, 0, 0,
+         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0, 0, -1, 1, 0,
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0, 0, -1, 1, 1,
+        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0, 0, -1, 0, 1,
+
+        // left
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, -1, 0, 0, 0, 0,
+        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, -1, 0, 0, 0, 1,
+        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, -1, 0, 0, 1, 1,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, -1, 0, 0, 1, 0,
+
+        // right
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1, 0, 0, 0, 0,
+        0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1, 0, 0, 0, 1,
+        0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1, 0, 0, 1, 1,
+        0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1, 0, 0, 1, 0,
+
+        // bottom
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0, -1, 0, 0, 0,
+         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0, -1, 0, 1, 0,
+         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0, -1, 0, 1, 1,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0, -1, 0, 0, 1,
+
+        // top
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0, 1, 0, 0, 0,
+         0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0, 1, 0, 1, 0,
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0, 1, 0, 1, 1,
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0, 1, 0, 0, 1,
+    };
+
+    u16 indices[] = {
+        // front
+        0, 1, 2,
+        0, 2, 3,
+        //back
+        6, 5, 4,
+        7, 6, 4,
+        // left
+        10, 9, 8,
+        11, 10, 8,
+        // right
+        12, 13, 14,
+        12, 14, 15,
+        // top
+        16, 17, 18,
+        16, 18, 19,
+        // bottom
+        22, 21, 20,
+        23, 22, 20,
+    };
+
+    auto vertex_layout = VertexLayout{
+        .elements = { {
+                .index  = 0,
+                .size   = 3,
+                .type   = VertexElement::Type::F32,
+                .offset = 0,
+            }, {
+                .index  = 1,
+                .size   = 3,
+                .type   = VertexElement::Type::F32,
+                .offset = sizeof(f32) * 3,
+            }, {
+                .index  = 2,
+                .size   = 3,
+                .type   = VertexElement::Type::F32,
+                .offset = sizeof(f32) * 6,
+            }, {
+                .index  = 3,
+                .size   = 2,
+                .type   = VertexElement::Type::F32,
+                .offset = sizeof(f32) * 9,
+            }
+        },
+        .stride = sizeof(f32) * 11, // 3 pos, 3 nml, 3 color and 2 uv
+    };
+
+    return std::make_shared<Mesh>(vertex_layout, vertices, indices);
 }
 

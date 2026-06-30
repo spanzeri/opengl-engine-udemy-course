@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
+constexpr char DEFAULT_WINDOW_TITLE[] = "OpenGL Engine";
+
 static Key key_from_glfw(s32 glfw_key) {
     // Those need to match
     return (Key)glfw_key;
@@ -56,7 +58,7 @@ bool Engine::Init(s32 width, s32 height)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_window = glfwCreateWindow(width, height, "OpenGL Engine", nullptr, nullptr);
+    m_window = glfwCreateWindow(width, height, DEFAULT_WINDOW_TITLE, nullptr, nullptr);
     if (!m_window) {
         ERROR("Failed to create window");
         return false;
@@ -127,6 +129,8 @@ bool Engine::Init(s32 width, s32 height)
     graphics.Init();
     render_queue.Init();
 
+    glfwSwapInterval(1);
+
     return m_application->Init();
 }
 
@@ -136,6 +140,8 @@ void Engine::Shutdown()
         m_current_scene->Clear();
         m_current_scene.reset();
     }
+
+    texture_manager.Clear();
 
     graphics.Shutdown();
     render_queue.Shutdown();
@@ -165,8 +171,21 @@ void Engine::Run()
         glfwPollEvents();
 
         auto now = hrclock::now();
-        float dtsec = std::chrono::duration<float>(now - m_last_time).count();
+        f64 dtsec = std::chrono::duration<f64>(now - m_last_time).count();
         m_last_time = now;
+
+        m_average_dt_sec = Lerp(dtsec, m_average_dt_sec, 0.95f);
+
+        { // dt in window title
+            f32 fps = 1.0 / m_average_dt_sec;
+            auto new_title = fmt::format(
+                "{} - Average frame time: {:>8.3f}ms - Average fps: {:>5.0f}",
+                DEFAULT_WINDOW_TITLE,
+                m_average_dt_sec * 1000.0,
+                fps);
+            glfwSetWindowTitle(m_window, new_title.c_str());
+        }
+
 
         m_application->Update(dtsec);
         if (m_current_scene) {
@@ -180,7 +199,9 @@ void Engine::Run()
         glfwGetFramebufferSize(m_window, &win_w, &win_h);
         f32 aspect = (f32)win_w / (f32)win_h;
 
+        auto lights = std::vector<LightData>();
         FrameUniforms frame_uniforms = {};
+
         if (m_current_scene) {
             if (auto camera_object  = m_current_scene->GetActiveCamera()) {
                 auto* camera_comp = camera_object->GetComponent<CameraComponent>();
@@ -189,13 +210,15 @@ void Engine::Run()
                 if (camera_comp) {
                     frame_uniforms.view       = camera_comp->GetViewMatrix();
                     frame_uniforms.proj       = camera_comp->GetProjectionMatrix(aspect);
-                    frame_uniforms.camera_pos = glm::vec4(camera_object->GetPositionWorld(), 1);
+                    frame_uniforms.camera_pos = glm::vec4(camera_object->GetWorldPosition(), 1);
                     frame_uniforms.time       = (f32)glfwGetTime();
                 }
             }
+
+            lights = m_current_scene->CollectLights();
         }
 
-        render_queue.Draw(frame_uniforms);
+        render_queue.Draw(frame_uniforms, lights);
         glfwSwapBuffers(m_window);
     }
 

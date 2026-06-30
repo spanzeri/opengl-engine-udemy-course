@@ -1,6 +1,7 @@
 #include "scene.h"
 
 #include "game-object.h"
+#include "components/light-component.h"
 
 #include <algorithm>
 
@@ -25,7 +26,7 @@ GameObject* Scene::CreateObject(std::string_view name, GameObject* parent) {
 
 bool Scene::SetParent(GameObject* obj, GameObject* parent) {
     bool result = false;
-    auto curr_parent = obj->parent;
+    auto curr_parent = obj->GetParent();
 
     if (parent == nullptr) {
         if (curr_parent != nullptr) {
@@ -36,7 +37,7 @@ bool Scene::SetParent(GameObject* obj, GameObject* parent) {
 
             if (it != curr_parent->m_children.end()) {
                 m_objects.push_back(MOV(*it));
-                obj->parent = nullptr;
+                obj->m_parent = nullptr;
                 curr_parent->m_children.erase(it);
                 result = true;
             }
@@ -50,7 +51,7 @@ bool Scene::SetParent(GameObject* obj, GameObject* parent) {
             if (it == m_objects.end()) {
                 // This is new
                 m_objects.push_back(std::unique_ptr<GameObject>(obj));
-                obj->parent = nullptr;
+                obj->m_parent = nullptr;
                 result = true;
             }
         }
@@ -70,12 +71,12 @@ bool Scene::SetParent(GameObject* obj, GameObject* parent) {
                         found = true;
                         break;
                     }
-                    current_element = current_element->parent;
+                    current_element = current_element->m_parent;
                 }
 
                 if (!found) {
                     parent->m_children.push_back(MOV(*it));
-                    obj->parent = parent;
+                    obj->m_parent = parent;
                     curr_parent->m_children.erase(it);
                     result = true;
                 }
@@ -88,7 +89,7 @@ bool Scene::SetParent(GameObject* obj, GameObject* parent) {
 
             if (it == m_objects.end()) {
                 parent->m_children.push_back(std::unique_ptr<GameObject>(obj));
-                obj->parent = parent;
+                obj->m_parent = parent;
                 result = true;
             } else {
                 bool found = false;
@@ -98,12 +99,12 @@ bool Scene::SetParent(GameObject* obj, GameObject* parent) {
                         found = true;
                         break;
                     }
-                    current_element = current_element->parent;
+                    current_element = current_element->m_parent;
                 }
 
                 if (!found) {
                     parent->m_children.push_back(MOV(*it));
-                    obj->parent = parent;
+                    obj->m_parent = parent;
                     m_objects.erase(it);
                     result = true;
                 }
@@ -120,5 +121,27 @@ void Scene::SetActiveCamera(GameObject* camera) {
 
  GameObject* Scene::GetActiveCamera() const {
     return m_active_camera;
+}
+
+std::vector<LightData> Scene::CollectLights() const {
+    auto result = std::vector<LightData>();
+    for (const auto& obj : m_objects) {
+        CollectLightsFromObject(obj.get(), result);
+    }
+    return result;
+}
+
+void Scene::CollectLightsFromObject(GameObject* obj, std::vector<LightData>& out_lights) const {
+    if (!obj) {
+        return;
+    }
+
+    if (auto* light = obj->GetComponent<LightComponent>()) {
+        out_lights.push_back({ .color = light->color, .position = obj->GetWorldPosition() });
+    }
+
+    for (auto& child : obj->m_children) {
+        CollectLightsFromObject(child.get(), out_lights);
+    }
 }
 

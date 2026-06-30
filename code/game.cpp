@@ -3,135 +3,38 @@
 #include <engine/engine.h>
 #include <engine/graphics/shader-program.h>
 #include <engine/graphics/texture.h>
+#include <engine/scene/components/animation-component.h>
 #include <engine/scene/components/camera-component.h>
+#include <engine/scene/components/light-component.h>
 #include <engine/scene/components/mesh-component.h>
 #include <engine/scene/components/player-controller-component.h>
 
-bool Game::Init()
-{
+bool Game::Init() {
     //
     // Material
     //
 
     auto material = Material::Load("material/brick.mat");
 
-    // auto vertex_shader_text = fs.LoadAssetTextFile("shader/default.vert.glsl");
-    // auto fragment_shader_text = fs.LoadAssetTextFile("shader/default.frag.glsl");
-    //
-    // auto& graphics = Engine::GetInstance().graphics;
-    // auto shader = graphics.CreateShaderProgram(vertex_shader_text, fragment_shader_text);
-    // graphics.BindShaderProgram(shader.get());
-    //
-    // auto material = std::make_shared<Material>(MOV(shader));
-    // // Load texture
-    // material->SetParam(0, Texture::Load("texture/brick.png"));
-
     //
     // Mesh
     //
 
-    f32 vertices[] = {
-         //    position    |     color      |    uvs
-        // front
-        -0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0, 0,
-         0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1, 0,
-         0.5f,  0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1, 1,
-        -0.5f,  0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0, 1,
-
-        // back
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0, 0,
-         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1, 0,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1, 1,
-        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0, 1,
-
-        // left
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0, 0,
-        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0, 1,
-        -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1, 1,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1, 0,
-
-        // right
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0, 0,
-        0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0, 1,
-        0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1, 1,
-        0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1, 0,
-
-        // top
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0, 0,
-         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1, 0,
-         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1, 1,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0, 1,
-
-        // bottom
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0, 0,
-         0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1, 0,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 1, 1,
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0, 1,
-    };
-
-    u16 indices[] = {
-        // front
-        0, 1, 2,
-        0, 2, 3,
-        //back
-        6, 5, 4,
-        7, 6, 4,
-        // left
-        10, 9, 8,
-        11, 10, 8,
-        // right
-        12, 13, 14,
-        12, 14, 15,
-        // top
-        16, 17, 18,
-        16, 18, 19,
-        // bottom
-        22, 21, 20,
-        23, 22, 20,
-    };
-
-    auto vertex_layout = VertexLayout{
-        .elements = { {
-                .index  = 0,
-                .size   = 3,
-                .type   = VertexElement::Type::F32,
-                .offset = 0,
-            }, {
-                .index  = 1,
-                .size   = 3,
-                .type   = VertexElement::Type::F32,
-                .offset = sizeof(f32) * 3,
-            }, {
-                .index  = 2,
-                .size   = 2,
-                .type   = VertexElement::Type::F32,
-                .offset = sizeof(f32) * 6,
-            }
-        },
-        .stride = sizeof(f32) * 8, // 3 pos, 3 nml and 2 uv
-    };
-
-    auto mesh = std::make_shared<Mesh>(vertex_layout, vertices, indices);
+    auto cube_mesh = Mesh::CreateCube();
 
     auto* scene = new Scene();
     Engine::GetInstance().SetCurrentScene(scene);
 
     auto cube1 = scene->CreateObject<GameObject>("Cube1");
-    cube1->AddComponent(new MeshComponent(material, mesh));
+    cube1->AddComponent(new MeshComponent(material, cube_mesh));
     cube1->SetPosition(glm::vec3(-1, 0, 0));
 
     auto cube2 = scene->CreateObject<GameObject>("Cube2");
-    cube2->AddComponent(new MeshComponent(material, mesh));
+    cube2->AddComponent(new MeshComponent(material, cube_mesh));
     cube2->SetPosition(glm::vec3( 1, 0, 0));
 
-    {
-        auto suzanne_mesh = Mesh::Load("model/suzanne/Suzanne.gltf");
-        auto suzanne_mat  = Material::Load("material/suzanne.mat");
-        auto suzanne_obj = scene->CreateObject<GameObject>("Suzanne");
-        suzanne_obj->AddComponent(new MeshComponent(suzanne_mat, suzanne_mesh));
-        suzanne_obj->SetPosition(glm::vec3( 0, 1, 0));
-    }
-
+    auto suzanne_obj = GameObject::LoadGLTF("model/suzanne/Suzanne.gltf");
+    suzanne_obj->SetPosition(glm::vec3(-3, 1, 0));
 
     auto* player = scene->CreateObject("Player");
     player->AddComponent(new PlayerControllerComponent());
@@ -141,17 +44,39 @@ bool Game::Init()
     camera->SetPosition(glm::vec3(0, 0, 1));
     scene->SetActiveCamera(camera);
 
+    // auto gun_obj = GameObject::LoadGLTF("model/service_pistol/service_pistol.gltf");
+    // gun_obj->SetParent(camera);
+    // gun_obj->SetPosition(glm::vec3(0.15f, -0.13f, -0.3f));
+    auto gun_obj = GameObject::LoadGLTF("model/sten_gunmachine_carbine/scene.gltf");
+    gun_obj->SetParent(camera);
+    gun_obj->SetPosition(glm::vec3(0.75f, -0.5f, -0.75f));
+    gun_obj->SetScale(glm::vec3(-1, 1, 1));
+    if (auto* anim_component = gun_obj->GetComponent<AnimationComponent>()) {
+        if (auto bullet = gun_obj->FindChildByName("bullet_33")) {
+            bullet->SetActive(false);
+        }
+
+        if (auto fire = gun_obj->FindChildByName("BOOM_35")) {
+            fire->SetActive(false);
+        }
+
+        anim_component->Play("shoot", true);
+    }
+
+    auto* point_light = scene->CreateObject("PointLight");
+    point_light->AddComponent(new LightComponent(glm::vec3(1.0f, 0.8f, 0.8f)));
+    point_light->SetPosition(glm::vec3(0.f, 2.5f, 1.5f));
+
     return true;
 }
 
-void Game::Shutdown()
-{
+void Game::Shutdown() {
 }
 
-void Game::Update(f32 dt_sec)
-{
+void Game::Update(f32 dt_sec) {
     const auto &input = Engine::GetInstance().input;
     if (input.IsKeyJustPressed(Key::Escape)) {
         SetNeedsToBeClosed();
     }
 }
+
